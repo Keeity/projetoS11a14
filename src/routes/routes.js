@@ -7,6 +7,7 @@ const { Op } = require("sequelize"); //Op é importado do sequelize .  Op é usa
 const Aluno = require('../models/Aluno');
 const Curso = require('../models/Curso');
 const Matricula = require('../models/Matricula');
+const Professor = require('../models/Professor');
 
 const routes = new Router; //Router é uma classe no javascript. Atribui a uma variável (aqui é a routes). 
 
@@ -94,7 +95,7 @@ routes.get('/alunos', async (req, res) => {
     const alunos = await Aluno.findAll({ where: params });
 
     if(alunos.length > 0)  {
-      console.log(`Listando ${req.query.nome ? 'apenas os alunos filtrados a partir de ' + req.query.nome : 'todos os alunos'}`);
+      console.log(`Listando ${req.query.nome ? 'apenas os alunos filtrados a partir de ' + req.query.nome : 'todos os alunos'}`); //expressão ternária que substitui if else - Se req.query.nome for verdadeiro, retorna 'apenas os alunos filtrados a partir de ' + req.query.nome. Caso contrário, retorna 'todos os alunos'.
       return res.status(200).json(alunos);
     } else {
       console.log(`Nenhum aluno encontrado com o parâmetro fornecido (${req.query.nome}).`);
@@ -127,6 +128,22 @@ console.log("Alteração realizada com sucesso!")
 res.status(200).json(aluno)
 })
 
+// Atualização parcial de um Aluno - celular
+routes.patch('/alunos/:id', async (req, res) => {
+  const  id = req.params.id;
+const celular = req.body.celular;
+ const aluno = await Aluno.findByPk(id)
+
+  if (!aluno) {
+return  res.status(404).json({ error: 'Aluno não encontrado.'})
+  }
+//curso.update(req.body);     . O método .update() é útil quando você quer atualizar vários campos de uma vez a partir de um objeto
+aluno.celular = celular;
+await aluno.save()
+console.log("Alteração realizada com sucesso!")
+res.status(200).json({ message: `Aluno id ${id} teve o celular alterado para ${celular} com sucesso!`});
+});
+
 
 
 //deleta aluno por id - com validação
@@ -157,6 +174,7 @@ routes.post('/cursos', async (req,res) => {
 try{
     const nome = req.body.nome //puxa variável nome, para capturar quando preencherem
       const duracao_horas = req.body.duracao_horas 
+      const professor_id = req.body.professor_id
 
       if(!nome) { //!nome é o mesmo que nome === . se quisesse incluir outro, colocaria ||
         return res.status(400).json({message:'O nome do curso é obrigatório!'}) //return - encerra o código por aí mesmo . 400 é bad request
@@ -168,7 +186,8 @@ if (!(duracao_horas >= 1 && duracao_horas <=500)) { //mais prático assim quando
 }
     const curso = await Curso.create({
         nome: nome,
-        duracao_horas: duracao_horas
+        duracao_horas: duracao_horas,
+        professor_id: professor_id
     })  
    res.status(201).json({name: 'Curso Criado!'}) //ou  res.json(cursoaluno)
   }
@@ -188,40 +207,25 @@ if (!(duracao_horas >= 1 && duracao_horas <=500)) { //mais prático assim quando
 //filtra cursos por parte do nome e validação maiúsculas ou LISTA CURSOS
 
 routes.get('/cursos', async (req, res) => {
-  let params = {}
+  try {
+    let params = {};
+    if(req.query.nome) {
+      params = {...params, nome: { [Op.iLike]: '%' + req.query.nome + '%' }} //ilike ignora maiuscula/minuscula
+    }
+    const cursos = await Curso.findAll({ where: params });
 
-  if(req.query.nome)  {
-    //se exigisse o nome certinho
-    //    params = {...params, nome: req.query.nome}
-  
-
-  // se fosse usar apenas sem diferenciar maiuscula minusculas
-  //    params = {...params, nome: { [Op.iLike]: req.query.nome }} 
-
-  //se fosse usar apenas para pegar parte do nome
-  //  params = {...params, nome: { [Op.like]: '%' + req.query.nome + '%' }}
-
-  //Se fosse para mesclar os 2
-  params = {...params, nome: { [Op.iLike]: '%' + req.query.nome + '%' }}
-
-        //  const cursos = await Curso.findAll()   //aqui, findAll() busca todos os alunos
-  //   res.status(201).json(cursos)
-  //  })
-  
- const cursos = await Curso.findAll({
-      where: params
-
-
-})
-return  res.json(cursos)
-}
-const cursos = await Curso.findAll()   //aqui, findAll() busca todos os alunos
-  //   res.status(201).json(cursos)
-  //  })
-
-  res.status(200).json(cursos)
-})
-
+    if(cursos.length > 0)  {
+      console.log(`Listando ${req.query.nome ? 'apenas os cursos filtrados a partir de ' + req.query.nome : 'todos os cursos'}`); //expressão ternária que substitui if else - Se req.query.nome for verdadeiro, retorna 'apenas os professores filtrados a partir de ' + req.query.nome. Caso contrário, retorna 'todos os professores'.
+      return res.status(200).json(cursos);
+    } else {
+      console.log(`Nenhum curso encontrado com o parâmetro fornecido (${req.query.nome}).`);
+      return res.status(404).json({error: 'Nenhum curso encontrado'});
+    }
+  } catch (error) {
+    console.error(`Erro ao buscar cursos: ${error}`);
+    return res.status(500).json({error: 'Erro interno do servidor'});
+  }
+});
 
 //PUT - altera curso por id - forma 1
 
@@ -262,6 +266,24 @@ routes.put('/cursos/:id', async (req,res) => {
 // } 
 // });
   
+
+// Atualização parcial de um Curso - professor
+routes.patch('/cursos/:id', async (req, res) => {
+  const  id = req.params.id;
+const professor_id = req.body.professor_id;
+ const curso = await Curso.findByPk(id)
+
+  if (!curso) {
+return  res.status(404).json({ error: 'Curso não encontrado.'})
+  }
+//curso.update(req.body);     . O método .update() é útil quando você quer atualizar vários campos de uma vez a partir de um objeto
+curso.professor_id = professor_id;
+await curso.save()
+console.log("Alteração realizada com sucesso!")
+res.status(200).json({ message: `Curso id ${id} teve o professor alterado para Professor ID ${professor_id} com sucesso!`});
+});
+
+
 
   //deleta cursos POR ID route params
   routes.delete('/cursos/:id', (req,res) => { //deletar pela rota. Vai deletar o que estiver /cursos/3
@@ -344,6 +366,99 @@ return res.status(204).json({message: `Matrícula ID ${id} deletada com sucesso!
         })  
     
 
+//cadastrar professor
+routes.post('/professores', async (req,res) => { 
+  try {
+    const nome = req.body.nome //puxa variável nome, para capturar quando preencherem
+      const area_atuacao = req.body.area_atuacao
+      const celular = req.body.celular
+if(!(nome && nome.length >= 8)) { 
+return res.status(400).json({message:'O nome completo é obrigatório!'}) //return - encerra o código por aí mesmo . 400 é bad request
+}
+  if(!celular) {
+    return res.status(400).json({message:'A inclusão de celular é obrigatória!'})
+  }
+ const professor = await Professor.create({ 
+       nome: nome,
+       area_atuacao: area_atuacao,
+        celular: celular
+}) 
+console.log(`Professor Criado: ${nome}!`)
+res.status(201).json(professor)
+} catch (error) { 
+console.log(error.message) //retorna o erro aqui (mensagem técnica)
+ res.status(500).json({error: 'Não foi possível cadastrar o professor'})
+}
+  })   
+
+
+
+//filtra professores por parte do nome e validação maiúsculas ou LISTA professores se não indicar filtro
+
+routes.get('/professores', async (req, res) => {
+  try {
+    let params = {};
+    if(req.query.nome) {
+      params = {...params, nome: { [Op.iLike]: '%' + req.query.nome + '%' }} //ilike ignora maiuscula/minuscula
+    }
+    const professores = await Professor.findAll({ where: params });
+
+    if(professores.length > 0)  {
+      console.log(`Listando ${req.query.nome ? 'apenas os professores filtrados a partir de ' + req.query.nome : 'todos os professores'}`); //expressão ternária que substitui if else - Se req.query.nome for verdadeiro, retorna 'apenas os professores filtrados a partir de ' + req.query.nome. Caso contrário, retorna 'todos os professores'.
+      return res.status(200).json(professores);
+    } else {
+      console.log(`Nenhum professor encontrado com o parâmetro fornecido (${req.query.nome}).`);
+      return res.status(404).json({error: 'Nenhum professor encontrado'});
+    }
+  } catch (error) {
+    console.error(`Erro ao buscar professores: ${error}`);
+    return res.status(500).json({error: 'Erro interno do servidor'});
+  }
+});
+
+//PUT - altera professor por id (todos os campos)
+routes.put('/professores/:id', async (req,res) => {
+const id = req.params.id;
+const professor = await Professor.findByPk(id)
+
+if(!professor){
+  return res.status(404).json({error: 'Professor não encontrado.'})
+}
+professor.update(req.body)
+await professor.save()
+console.log("Alteração realizada com sucesso!")
+res.status(200).json(professor)
+})
+
+
+// Atualização parcial de um professor - celular
+routes.patch('/professores/:id', async (req, res) => {
+  const  id = req.params.id;
+const celular = req.body.celular;
+ const professor = await Professor.findByPk(id)
+
+  if (!professor) {
+return  res.status(404).json({ error: 'Professor não encontrado.'})
+  }
+//curso.update(req.body);     . O método .update() é útil quando você quer atualizar vários campos de uma vez a partir de um objeto
+professor.celular = celular;
+await professor.save()
+console.log("Alteração realizada com sucesso!")
+res.status(200).json({ message: `Professor id ${id} teve o celular alterado para ${celular} com sucesso!`});
+});
+
+
+//deleta professor por id - com validação
+  routes.delete('/professores/:id', async (req,res) => { //deletar pela rota. Vai deletar o que estiver /cursos/3
+    const { id } = req.params;   //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
+   const professor = await Professor.findByPk(id);
+   if(!professor) {
+    return res.status(404).json({error:`Professor ID ${id} não encontrado.`})
+     }
+   await professor.destroy() //ele deleta usando sequelize.
+    
+    res.status(204).json({message: `Professor ID ${id} deletado com sucesso!`})
+      })  
 
 module.exports = routes  //exporta 
 // é o mesmo que: export default routes
