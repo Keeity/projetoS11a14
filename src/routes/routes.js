@@ -212,11 +212,15 @@ routes.get('/cursos', async (req, res) => {
     if(req.query.nome) {
       params = {...params, nome: { [Op.iLike]: '%' + req.query.nome + '%' }} //ilike ignora maiuscula/minuscula
     }
+    if(req.query.duracao_horas) {
+      params = {...params, duracao_horas: { [Op.iLike]: '%' + req.query.duracao_horas + '%' }} //ilike ignora maiuscula/minuscula
+    }
     const cursos = await Curso.findAll({ where: params });
 
     if(cursos.length > 0)  {
-      console.log(`Listando ${req.query.nome ? 'apenas os cursos filtrados a partir de ' + req.query.nome : 'todos os cursos'}`); //expressão ternária que substitui if else - Se req.query.nome for verdadeiro, retorna 'apenas os professores filtrados a partir de ' + req.query.nome. Caso contrário, retorna 'todos os professores'.
-      return res.status(200).json(cursos);
+     // console.log(`Listando ${req.query.nome ? 'apenas os cursos filtrados a partir de ' + req.query.nome : 'todos os cursos'}`); //expressão ternária que substitui if else - Se req.query.nome for verdadeiro, retorna 'apenas os professores filtrados a partir de ' + req.query.nome. Caso contrário, retorna 'todos os professores'.
+     `Listando ${req.query.nome ? 'apenas os cursos filtrados a partir de ' + req.query.nome : 'todos os cursos'} ${req.query.duracao ? 'com duração de ' + req.query.duracao : ''}` //assim traz também duração
+     return res.status(200).json(cursos);
     } else {
       console.log(`Nenhum curso encontrado com o parâmetro fornecido (${req.query.nome}).`);
       return res.status(404).json({error: 'Nenhum curso encontrado'});
@@ -234,7 +238,8 @@ routes.put('/cursos/:id', async (req,res) => {
   const curso = await Curso.findByPk(id)
   
   if(!curso){
-    return res.status(404).json({error: 'Curso não encontrado.'})
+    console.error(`Erro ao buscar cursos: ${error}`);
+    return res.status(400).json({error: 'Curso não encontrado.'})
   }
   curso.update(req.body)
   await curso.save()
@@ -242,7 +247,6 @@ routes.put('/cursos/:id', async (req,res) => {
   res.status(200).json(curso)
   })
 
-  
 
 // //PUT - altera curso por id - forma 2
 
