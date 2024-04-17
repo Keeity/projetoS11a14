@@ -11,12 +11,17 @@ const Professor = require('../models/Professor');
 
 const routes = new Router; //Router é uma classe no javascript. Atribui a uma variável (aqui é a routes). 
 
-//criar a primeira rota
-//existem 4 tipos de rotas: GET, POST, PUT, DELETE, 
-// 1o) define o tipo de rota; 2o) define o path ('/')
+//criar a primeira rota.existem 4 tipos de rotas: GET, POST, PUT, DELETE,// 1o) define o tipo de rota; 2o) define o path ('/')
 routes.get('/bem_vindo', (req,res) => {
-res.json({name:"Bem vindo!"})
+try {
+  res.json({name:"Bem vindo!"})
+} catch (error) {
+  console.error(`Erro ao tentar abrir: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+}
 })
+
+/* _____________ ALUNOS  _______________ */
 
 //cadastrar aluno na tabela de banco de dados
 routes.post('/alunos', async (req,res) => { //coloca o async na frente da função que vai ser executada completamente antes 
@@ -85,6 +90,23 @@ console.log(error.message) //retorna o erro aqui (mensagem técnica)
 
 // })
 
+//filtrar aluno por id route params
+
+routes.get('/alunos/:id', async (req, res) => {
+try {
+  const { id} = req.params
+  const aluno = await Aluno.findByPk(id)
+  if(!aluno) {
+    return res.status(404).json({ message: "Usuário não encontrado!"})
+  }
+res.json(aluno) //se não escreve nada, ele reconhece 200
+
+} catch (error) {
+  console.error(`Erro ao buscar alunos: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+}
+})
+
 //melhorado pelo copilot
 routes.get('/alunos', async (req, res) => {
   try {
@@ -102,7 +124,7 @@ routes.get('/alunos', async (req, res) => {
       return res.status(404).json({error: 'Nenhum aluno encontrado'});
     }
   } catch (error) {
-    console.error(`Erro ao buscar alunos: ${error}`);
+    console.error(`Erro ao alterar alunos: ${error}`);
     return res.status(500).json({error: 'Erro interno do servidor'});
   }
 });
@@ -116,7 +138,9 @@ routes.get('/alunos', async (req, res) => {
 //PUT - altera aluno por id
 
 routes.put('/alunos/:id', async (req,res) => {
-const id = req.params.id;
+
+  try {
+  const id = req.params.id;
 const aluno = await Aluno.findByPk(id)
 
 if(!aluno){
@@ -126,10 +150,15 @@ aluno.update(req.body)
 await aluno.save()
 console.log("Alteração realizada com sucesso!")
 res.status(200).json(aluno)
+} catch (error) {
+  console.error(`Erro ao tentar alterar: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+}
 })
 
 // Atualização parcial de um Aluno - celular
 routes.patch('/alunos/:id', async (req, res) => {
+try {
   const  id = req.params.id;
 const celular = req.body.celular;
  const aluno = await Aluno.findByPk(id)
@@ -142,12 +171,17 @@ aluno.celular = celular;
 await aluno.save()
 console.log("Alteração realizada com sucesso!")
 res.status(200).json({ message: `Aluno id ${id} teve o celular alterado para ${celular} com sucesso!`});
+} catch (error) {
+  console.error(`Erro ao tentar atualizar: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+}
 });
 
 
 
 //deleta aluno por id - com validação
   routes.delete('/alunos/:id', async (req,res) => { //deletar pela rota. Vai deletar o que estiver /cursos/3
+try{
     const { id } = req.params;   //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
    const aluno = await Aluno.findByPk(id);
    if(!aluno) {
@@ -156,10 +190,16 @@ res.status(200).json({ message: `Aluno id ${id} teve o celular alterado para ${c
    await aluno.destroy() //ele deleta usando sequelize.
     
     res.status(204).json({message: `Aluno ID ${id} deletado com sucesso!`})
-      })  
+  } catch (error) {
+    console.error(`Erro ao tentar excluir: ${error}`);
+    return res.status(500).json({error: 'Erro interno do servidor'});
+  }
+
+  })  
 
   //deleta aluno por id - route params - sem validação
   routes.delete('/alunos/:id', (req,res) => { //deletar pela rota. Vai deletar o que estiver /cursos/3
+   try {
     const id = req.params.id    //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
     Aluno.destroy({
       where: { id: id //aqui, pode colocar onde começa em x...
@@ -167,8 +207,14 @@ res.status(200).json({ message: `Aluno id ${id} teve o celular alterado para ${c
     }) //ele deleta usando sequelize.
     
     res.status(204).json({message: `Aluno ID ${id} deletado com sucesso!`})
-      })  
+  } catch (error) {
+    console.error(`Erro ao tentar excluir: ${error}`);
+    return res.status(500).json({error: 'Erro interno do servidor'});
+  }   
+  })  
     
+/* _____________ CURSOS  _______________ */
+
 //cria curso
 routes.post('/cursos', async (req,res) => {
 try{
@@ -208,9 +254,9 @@ if (!(duracao_horas >= 1 && duracao_horas <=500)) { //mais prático assim quando
 
 routes.get('/cursos', async (req, res) => {
   try {
-    let params = {};
+    let params = {}; //começa vazio
     if(req.query.nome) {
-      params = {...params, nome: { [Op.iLike]: '%' + req.query.nome + '%' }} //ilike ignora maiuscula/minuscula
+      params = {...params, nome: { [Op.iLike]: '%' + req.query.nome + '%' }} //ilike ignora maiuscula/minuscula. Os ... significam que ele cria uma cópia (... params) com chaves e valores já existentes. essa linha significa params =  
     }
     if(req.query.duracao_horas) {
       params = {...params, duracao_horas: { [Op.iLike]: '%' + req.query.duracao_horas + '%' }} //ilike ignora maiuscula/minuscula
@@ -234,18 +280,26 @@ routes.get('/cursos', async (req, res) => {
 //PUT - altera curso por id - forma 1
 
 routes.put('/cursos/:id', async (req,res) => {
-  const id = req.params.id;
+  try {
+  const id = req.params.id;  // pode ser const { id} = req.params
   const curso = await Curso.findByPk(id)
   
   if(!curso){
     console.error(`Erro ao buscar cursos: ${error}`);
-    return res.status(400).json({error: 'Curso não encontrado.'})
+    return res.status(404).json({error: 'Curso não encontrado.'})
   }
-  curso.update(req.body)
+  curso.update(req.body) //dados vêm do body. 
   await curso.save()
   console.log("Alteração realizada com sucesso!")
   res.status(200).json(curso)
-  })
+}
+catch (error) {
+console.log(error.message)
+res.status(500).json({ error: 'Não foi possível realizar a alteração.'})
+
+}
+})
+
 
 
 // //PUT - altera curso por id - forma 2
@@ -273,6 +327,7 @@ routes.put('/cursos/:id', async (req,res) => {
 
 // Atualização parcial de um Curso - professor
 routes.patch('/cursos/:id', async (req, res) => {
+try {
   const  id = req.params.id;
 const professor_id = req.body.professor_id;
  const curso = await Curso.findByPk(id)
@@ -285,25 +340,35 @@ curso.professor_id = professor_id;
 await curso.save()
 console.log("Alteração realizada com sucesso!")
 res.status(200).json({ message: `Curso id ${id} teve o professor alterado para Professor ID ${professor_id} com sucesso!`});
+} catch (error) {
+  console.error(`Erro ao tentar atualizar: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+}
 });
 
 
 
   //deleta cursos POR ID route params
   routes.delete('/cursos/:id', (req,res) => { //deletar pela rota. Vai deletar o que estiver /cursos/3
-const id = req.params.id    //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
+try {
+    const id = req.params.id    //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
 Curso.destroy({
   where: { id: id //aqui, pode colocar onde começa em x...
   }
 }) //ele deleta usando sequelize.
 
-res.status(204).json({message: `Curso ID ${id} deletado com sucesso!`})
-  })  
+res.status(204)//.json({message: `Curso ID ${id} deletado com sucesso!`}) //em delete, se coloca 204 (padrão), ele não retorna nada. Mesmo que inclua mensagem aqui. Se quiser retornar mensagem, altera para 200
+} catch (error) {
+  console.error(`Erro ao tentar excluir: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+} 
+})  
 
 
 //deleta cursos  com validação prévia
 
 routes.delete('/cursos/:id', async (req,res) => {
+try{
   const { id } = req.params;
 const curso = await Curso.findByPk(id);
 if (!curso) {
@@ -311,8 +376,13 @@ if (!curso) {
 }
 await curso.destroy();
 return res.status(204).json({})
-
+} catch (error) {
+  console.error(`Erro ao tentar deletar: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+}
 })
+
+/* _____________ MATRICULAS  _______________ */
 
     //cria matricula
 routes.post('/matriculas', async (req,res) => {
@@ -341,13 +411,19 @@ catch (error) { //catch pega o que não é previsível.. mais fatal. Tem gente q
 
 //lista matriculas
 routes.get('/matriculas', async (req,res) => {// async await é para cada função
-    const matriculas = await Matricula.findAll()   //aqui, findAll() busca todos os alunos
+  try {  
+  const matriculas = await Matricula.findAll()   //aqui, findAll() busca todos os alunos
      res.status(200).json(matriculas)
+    } catch (error) {
+      console.error(`Erro ao tentar listar: ${error}`);
+      return res.status(500).json({error: 'Erro interno do servidor'});
+    }
     })
 
 //        deleta por ID  valida se existe
 
 routes.delete('/matriculas/:id', async (req,res) => {   //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
+try {
   const {id} = req.params; 
 const matricula = await Matricula.findByPk(id);
 if (!matricula) {
@@ -356,19 +432,29 @@ return res.status(404).json({ error: 'ID não encontrado'})
   
 await matricula.destroy();
 return res.status(204).json({message: `Matrícula ID ${id} deletada com sucesso!`})
-    })  
+} catch (error) {
+  console.error(`Erro ao tentar deletar: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+}   
+})  
 
 
     //deleta por ID - simples
     routes.delete('/matriculas/:id', (req,res) => {   const id = req.params.id    //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
-      Matricula.destroy({
+   try {
+    Matricula.destroy({
         where: { id: id //aqui, pode colocar onde começa em x...
         }
       }) //ele deleta usando sequelize.
       
       res.status(204).json({message: `Matrícula ID ${id} deletado com sucesso!`})
-        })  
-    
+    } catch (error) {
+      console.error(`Erro ao tentar excluir: ${error}`);
+      return res.status(500).json({error: 'Erro interno do servidor'});
+    }   
+    })  
+
+/* _____________ PROFESSORES  _______________ */        
 
 //cadastrar professor
 routes.post('/professores', async (req,res) => { 
@@ -422,7 +508,8 @@ routes.get('/professores', async (req, res) => {
 
 //PUT - altera professor por id (todos os campos)
 routes.put('/professores/:id', async (req,res) => {
-const id = req.params.id;
+try {
+  const id = req.params.id;
 const professor = await Professor.findByPk(id)
 
 if(!professor){
@@ -432,12 +519,17 @@ professor.update(req.body)
 await professor.save()
 console.log("Alteração realizada com sucesso!")
 res.status(200).json(professor)
+} catch (error) {
+  console.error(`Erro ao tentar atualizar: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+}
 })
 
 
 // Atualização parcial de um professor - celular
 routes.patch('/professores/:id', async (req, res) => {
-  const  id = req.params.id;
+try {
+    const  id = req.params.id;
 const celular = req.body.celular;
  const professor = await Professor.findByPk(id)
 
@@ -449,20 +541,29 @@ professor.celular = celular;
 await professor.save()
 console.log("Alteração realizada com sucesso!")
 res.status(200).json({ message: `Professor id ${id} teve o celular alterado para ${celular} com sucesso!`});
+} catch (error) {
+  console.error(`Erro ao tentar atualizar: ${error}`);
+  return res.status(500).json({error: 'Erro interno do servidor'});
+}
 });
 
 
 //deleta professor por id - com validação
   routes.delete('/professores/:id', async (req,res) => { //deletar pela rota. Vai deletar o que estiver /cursos/3
-    const { id } = req.params;   //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
+ try {
+     const { id } = req.params;   //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
    const professor = await Professor.findByPk(id);
    if(!professor) {
     return res.status(404).json({error:`Professor ID ${id} não encontrado.`})
      }
    await professor.destroy() //ele deleta usando sequelize.
     
-    res.status(204).json({message: `Professor ID ${id} deletado com sucesso!`})
-      })  
+    res.status(204).json({message: `Professor ID ${id} deletado com sucesso!`}) //na verdade, 204 não retorna nada. Assim, mesmo que tenha colocado assim, não vai aparecer nada no postman!!!
+  } catch (error) {
+    console.error(`Erro ao tentar excluir: ${error}`);
+    return res.status(500).json({error: 'Erro interno do servidor'});
+  }
+  })  
 
 module.exports = routes  //exporta 
 // é o mesmo que: export default routes
