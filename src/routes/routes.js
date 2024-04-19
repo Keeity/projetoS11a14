@@ -21,15 +21,49 @@ try {
 }
 })
 
+/* _____________ ROTAS DE LOGIN  _______________ */
+
+
+routes.post('/login', async (req, res) => {
+  try {
+      const email = req.body.email
+      const password = req.body.password
+
+      if (!email) {
+          return res.status(400).json({ messagem: 'O email é obrigatório' })
+      }
+
+      if (!password) {
+          return res.status(400).json({ messagem: 'O password é obrigatório' })
+      }
+
+      const aluno = await Aluno.findOne({
+          where: {email:email, password:password}
+      })
+
+      if(!aluno){
+          return res.status(404).json({ messagem: 'Nenhum aluno corresponde a email e senha fornecidos!' })
+      }
+
+      res.status(200).json({"Esse é teu token JWT: JWT"})
+
+  } catch (error) {
+      return res.status(500).json({ error: error, messagem: 'Algo deu errado!' })
+  }
+})
+
 /* _____________ ALUNOS  _______________ */
 
 //cadastrar aluno na tabela de banco de dados
 routes.post('/alunos', async (req,res) => { //coloca o async na frente da função que vai ser executada completamente antes 
 
   try {
+     const email = req.body.email
+    const password = req.body.password
     const nome = req.body.nome //puxa variável nome, para capturar quando preencherem
       const data_nascimento = req.body.data_nascimento //tem que passar ano-mês-dia. O sequelize exporta ao BDD como data.
     const celular = req.body.celular
+   
 if(!nome) { //!nome é o mesmo que nome === "". se quisesse incluir outro, colocaria ||
 return res.status(400).json({message:'O nome é obrigatório!'}) //return - encerra o código por aí mesmo . 400 é bad request
 }
@@ -47,7 +81,8 @@ if(!data_nascimento) {
   //para trabalhar com datas (até tal data...), melhor trabalhar com biblioteca - momentJs date-fns
 
   const aluno = await Aluno.create({ //usa wait na frente do que quer esperar.
-   
+   email: email, 
+   password: password,
     nome: nome,
         data_nascimento: data_nascimento,
         celular: celular
@@ -60,6 +95,9 @@ console.log(error.message) //retorna o erro aqui (mensagem técnica)
 }
 
   })   
+
+
+
 
 
 //filtra alunos por parte do nome e validação maiúsculas ou LISTA alunos se não indicar filtro
