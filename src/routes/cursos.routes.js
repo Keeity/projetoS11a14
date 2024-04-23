@@ -1,6 +1,3 @@
-//routes.js  vai concentrar todas as rotas (ednpoints)
-
-//disponibiliza o kit inicial para desenvolver o backend. Importa a função chamada "Router" (letra maiscula) lá da biblioteca express
 //Router permite criar as rotas
 const {Router} = require('express');
 //const { Op } = require("sequelize"); //Op é importado do sequelize .  Op é usado na definição da rota para especificar o operador de consulta do Sequelize.
@@ -79,7 +76,7 @@ cursosRoutes.get('/', async (req, res) => {
 
 //PUT - altera curso por id - forma 1
 
-cursosRoutes.put('/:id', async (req,res) => {
+cursosRoutes.put('/:id', auth, async (req,res) => {
   try {
   const id = req.params.id;  // pode ser const { id} = req.params
   const curso = await Curso.findByPk(id)
@@ -123,10 +120,8 @@ res.status(200).json({ message: `Curso id ${id} teve o professor alterado para P
 }
 });
 
-
-
   //deleta cursos POR ID route params
-  cursosRoutes.delete('/:id', (req,res) => { //deletar pela rota. Vai deletar o que estiver /cursos/3
+  cursosRoutes.delete('/:id', auth, (req,res) => { //deletar pela rota. Vai deletar o que estiver /cursos/3
 try {
     const id = req.params.id    //o que se coloca depois dos : (ex: /:id) é o que usa depois do params.
 Curso.destroy({
@@ -144,7 +139,7 @@ res.status(204)//.json({message: `Curso ID ${id} deletado com sucesso!`}) //em d
 
 //deleta cursos  com validação prévia
 
-cursosRoutes.delete('/:id', async (req,res) => {
+cursosRoutes.delete('/:id', auth, async (req,res) => {
 try{
   const { id } = req.params;
 const curso = await Curso.findByPk(id);

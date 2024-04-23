@@ -19,7 +19,7 @@ try {
 }
 })
 
-/* _____________ ROTAS DE LOGIN  _______________ */
+/* _____________ ROTA DE LOGIN  _______________ */
  
 
 loginRoutes.post('/', async (req, res) => {
@@ -47,7 +47,6 @@ loginRoutes.post('/', async (req, res) => {
       const token = sign(payload, secret) // usa função sign do JWT. cria token padrão token jwt (Usando algoritmo HS256 - a mesma chave é usada para assinar e verificar o token) . puxa password do .env. --> importou lá em cima do database.config
                    // ao invés de secret poderia utilizar process.env.SECRET_JWT
       res.status(200).json({token: token})
-//res.status(200).json({message: "Esse é o token"})
 
   } catch (error) {
       return res.status(500).json({ error: error, message: 'Algo deu errado!' })
@@ -67,7 +66,6 @@ loginRoutes.put('/alterarsenha', auth, async (req,res) => {
 if(!aluno){
   return res.status(404).json({error: 'Aluno não encontrado.'})
 }
-
 aluno.password = password;
 await aluno.save();
 console.log("Alteração de senha realizada com sucesso!")

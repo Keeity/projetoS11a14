@@ -25,4 +25,5 @@ celular: {
 
 //para usar em qualquer lugar, exporta
 
+
 module.exports = Aluno //Model coloca com A maiúsculo.

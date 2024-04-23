@@ -41,12 +41,7 @@ if(!data_nascimento) {
   if(!(data_nascimento.match(/\d{4}-\d{2}-\d{2}/gm))) {
     return res.status(400).json({message:'A data de nascimento não está no formato correto!'})
   }
-
-     //para toda  variável string é possível colocar um .match, que retorna true ou false. Dentro dos parenteses, coloca um rejexs)
-
-  //para trabalhar com datas (até tal data...), melhor trabalhar com biblioteca - momentJs date-fns
-
-  const aluno = await Aluno.create({ //usa wait na frente do que quer esperar.
+     const aluno = await Aluno.create({ //usa wait na frente do que quer esperar.
    email: email, 
    password: password,
     nome: nome,
@@ -131,29 +126,6 @@ res.status(200).json(aluno)
 }
 })
 
-//alterar senha - utilizando id constante no payload
-
-alunosRoutes.put('/alterarsenha', auth, async (req,res) => {
-
-  try {
-
-   const id = req.payload.sub //usando o que há no payload.
-  const password = req.body.password //pega a nova senha do corpo da requisição
-  const aluno = await Aluno.findByPk(id)
-
-if(!aluno){
-  return res.status(404).json({error: 'Aluno não encontrado.'})
-}
-aluno.password = password;
-await aluno.save();
-console.log("Alteração de senha realizada com sucesso!")
-res.status(200).json({message: "Alteração de senha realizada com sucesso!"})
-} catch (error) {
-  console.error(`Erro ao tentar alterar: ${error}`);
-  return res.status(500).json({error: 'Erro interno do servidor'});
-}
-})
-
 
 // Atualização parcial de um Aluno - celular
 alunosRoutes.patch('/:id', auth, async (req, res) => {
@@ -214,4 +186,4 @@ try{
 
 
 module.exports = alunosRoutes  //exporta 
-// é o mesmo que: export default routes
+// é o mesmo que: export default alunosroutes
