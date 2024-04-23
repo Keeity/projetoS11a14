@@ -6,7 +6,13 @@ const { connection } = require('../database/connection')  //aqui, diz que quer c
 
 //Define a variável Aluno que representa a conexão com o banco de dados, com a tabela alunos
 const Aluno = connection.define('alunos', { //aqui, diz que quer conectar ao banco de dados, à tabela 'alunos'.
-nome: { //define cada coluna da tabela que se quer manipular - visualizar ou acessar. ID não precisa
+email: {
+    type: DataTypes.STRING
+},
+password: {
+    type: DataTypes.STRING
+},
+    nome: { //define cada coluna da tabela que se quer manipular - visualizar ou acessar. ID não precisa
     type: DataTypes.STRING //esse DataTypes importa do sequelize. Ao invés do varchar, coloca STRING
 },
 data_nascimento: {
