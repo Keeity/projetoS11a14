@@ -5,7 +5,7 @@ const routes = require('./routes/routes')
 
 const PORT_API = process.env.PORT_API 
 
-class Server {
+class Server { //é criada uma classe, com um constructor
   constructor (server = express())// Argumento do constructor auto iniciado da aplicação para usarmos as devidas funções do express
   { 
     this.middlewares(server) // Instância do argumento da função para a função middlewares

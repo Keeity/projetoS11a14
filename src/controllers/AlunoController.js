@@ -1,7 +1,7 @@
 //utiliza classe para criar controller. Classe é bem flexível.
 //dentro da classe, consegue ter 1) Construtor - primeira coisa que é executada quando chama a classe; 2) Métodos - ex listar(), 3) Atributos - variáveis
-const {Router} = require('express');
-const { Op } = require("sequelize"); //Op é importado do sequelize .  Op é usado na definição da rota para especificar o operador de consulta do Sequelize.
+//const {Router} = require('express');
+//const { Op } = require("sequelize"); //Op é importado do sequelize .  Op é usado na definição da rota para especificar o operador de consulta do Sequelize.
 const Aluno = require("../models/Aluno")
 
 class AlunoController {
