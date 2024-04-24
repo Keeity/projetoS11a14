@@ -8,103 +8,29 @@ const Aluno = require('../models/Aluno');
  const alunosRoutes = new Router; //Router é uma classe no javascript. Atribui a uma variável (aqui é a routes). 
 //const { secret } = require('../config/database.config');
 const { auth } = require('../middleware/auth');
+const AlunoController = require('../controllers/AlunoController');
 
 
 /* _____________ ALUNOS  _______________ */
 
 //cadastrar aluno na tabela de banco de dados
-alunosRoutes.post('/', async (req,res) => { //coloca o async na frente da função que vai ser executada completamente antes 
-//não precisa mais prever '/alunos', por conta da previsão em routes.js
-  try {
-     const email = req.body.email
-    const password = req.body.password
-    const nome = req.body.nome //puxa variável nome, para capturar quando preencherem
-      const data_nascimento = req.body.data_nascimento //tem que passar ano-mês-dia. O sequelize exporta ao BDD como data.
-    const celular = req.body.celular
-
-if(!email) {
-  return res.status(400).json({message:'O email é obrigatório!'}) //return - encerra o código por aí mesmo . 400 é bad request
-}
-
-if(!password) {
-  return res.status(400).json({message:'A senha é obrigatória!'}) //return - encerra o código por aí mesmo . 400 é bad request
-}
-
-if(!nome) { //!nome é o mesmo que nome === "". se quisesse incluir outro, colocaria ||
-return res.status(400).json({message:'O nome é obrigatório!'}) //return - encerra o código por aí mesmo . 400 é bad request
-}
-
-if(!data_nascimento) {
-  return res.status(400).json({message:'A data de nascimento é obrigatória!'}) //return - encerra o código por aí mesmo . 400 é bad request
-}
-  // Rejex - é recurso nativo = verificar se uma data está no formato "aaaa-mm-dd"
-  if(!(data_nascimento.match(/\d{4}-\d{2}-\d{2}/gm))) {
-    return res.status(400).json({message:'A data de nascimento não está no formato correto!'})
-  }
-     const aluno = await Aluno.create({ //usa wait na frente do que quer esperar.
-   email: email, 
-   password: password,
-    nome: nome,
-        data_nascimento: data_nascimento,
-        celular: celular
-  // res.json({name: `Aluno Criado: ${aluno}!`})
-}) 
-res.status(201).json(aluno) //Vai exibir o objeto aluno. Quando coloca variável no json, só coloca entre parêntes
-} catch (error) { //catch pega o que não é previsível.. mais fatal. Tem gente que inclui o previsível no catch também, mas daí tinha que fazer uns ajustes mais avançados.
-console.log(error.message) //retorna o erro aqui (mensagem técnica)
-  res.status(500).json({error: 'Não foi possível cadastrar o aluno'})
-}
-
-  })   
+alunosRoutes.post('/', AlunoController.cadastrar)
 
 
-
+//lista alunos com possibilidade de filtro
+alunosRoutes.get('/', auth, AlunoController.listarAlunos)
 
 //filtrar aluno por id route params
+alunosRoutes.get('/:id', auth, AlunoController.listarUm)
 
-alunosRoutes.get('/:id', auth, async (req, res) => {
-try {
-  const { id} = req.params
-  const aluno = await Aluno.findByPk(id)
-  if(!aluno) {
-    return res.status(404).json({ message: "Usuário não encontrado!"})
-  }
-res.json(aluno) //se não escreve nada, ele reconhece 200
-
-} catch (error) {
-  console.error(`Erro ao buscar alunos: ${error}`);
-  return res.status(500).json({error: 'Erro interno do servidor'});
-}
-})
-
-//melhorado pelo copilot
-alunosRoutes.get('/', auth, async (req, res) => {
-  try {
-    let params = {};
-    if(req.query.nome) {
-      params = {...params, nome: { [Op.iLike]: '%' + req.query.nome + '%' }} //ilike ignora maiuscula/minuscula
-    }
-    const alunos = await Aluno.findAll({ where: params });
-
-    if(alunos.length > 0)  {
-      console.log(`Listando ${req.query.nome ? 'apenas os alunos filtrados a partir de ' + req.query.nome : 'todos os alunos'}`); //expressão ternária que substitui if else - Se req.query.nome for verdadeiro, retorna 'apenas os alunos filtrados a partir de ' + req.query.nome. Caso contrário, retorna 'todos os alunos'.
-      return res.status(200).json(alunos);
-    } else {
-      console.log(`Nenhum aluno encontrado com o parâmetro fornecido (${req.query.nome}).`);
-      return res.status(404).json({error: 'Nenhum aluno encontrado'});
-    }
-  } catch (error) {
-    console.error(`Erro ao alterar alunos: ${error}`);
-    return res.status(500).json({error: 'Erro interno do servidor'});
-  }
-});
-
-// //Lista alunos simples
-// routes.get('/alunos', async (req,res) => {// async await é para cada função
-// const alunos = await Aluno.findAll()   //aqui, findAll() busca todos os alunos
+// // //Lista alunos simples
+// routes.get('/', async (req,res) => {// async await é para cada função
+// try {
+//   const alunos = await Aluno.findAll()   //aqui, findAll() busca todos os alunos
 //  res.status(201).json(alunos)
+// }
+// catch(){}
 // })
-
 //PUT - altera aluno por id
 
 alunosRoutes.put('/:id', auth, async (req,res) => {

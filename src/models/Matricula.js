@@ -10,14 +10,14 @@ const Curso = require('./Curso')
 //Define a variável Aluno que representa a conexão com o banco de dados, com a tabela alunos
 const Matricula = connection.define('matriculas', { //aqui, diz que quer conectar ao banco de dados, à tabela 'alunos'.
 aluno_id: { //define cada coluna da tabela que se quer manipular - visualizar ou acessar. ID não precisa
-    type: DataTypes.NUMBER,
+    type: DataTypes.INTEGER, //EU TINHA COLOCADO NUMBER
     references: {   //faz referência.
         model: Aluno,
         key: 'id'
     }
 },
 curso_id: {
-    type: DataTypes.NUMBER,
+    type: DataTypes.INTEGER,
     references: {  //faz referência.
         model: Curso,
         key: 'id'
