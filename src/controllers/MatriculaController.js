@@ -22,11 +22,21 @@ async cadastrar (req,res) {
 if(!(alunoExistente && cursoExistente)) {
     return res.status(404).json({message: "O aluno e/ou o curso não existem"})
 }
-            const matricula = await Matricula.create({
+const matriculaexistente = await Matricula.findOne({ //findone permite passar condições para ele buscar
+where: {
+  curso_id: curso_id,
+  aluno_id: aluno_id
+  }  
+    })
+if(matriculaexistente) { //matrícula existente é a validação aqui. No SQL, é como se fizesse uma consulta - where aluno_id (cadastrado) é igual ao aluno_id indicado no body e também curso_id da natricula = curso_id informado no body
+  return res.status(409).json({message: "Matícula já existente"})  //409 é o código de conflict. 403 é não autorizado, normalmente utilizado em coisas de permissão
+}
+    const matricula = await Matricula.create({
             aluno_id: aluno_id,
             curso_id: curso_id //se o nome da varirável é o mesmo, pode só deixar curso_id
         })  
-       res.status(201).json({name: 'Matrícula Criada!'})
+       
+        res.status(201).json({name: 'Matrícula Criada!'})
       }
     catch (error) { //catch pega o que não é previsível.. mais fatal. Tem gente que inclui o previsível no catch também, mas daí tinha que fazer uns ajustes mais avançados.
         console.log(error.message) //retorna o erro aqui (mensagem técnica)

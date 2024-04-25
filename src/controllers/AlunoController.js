@@ -35,6 +35,22 @@ async cadastrar(req,res) { // aqui, coloca desde o try até o catch
      if(!(data_nascimento.match(/\d{4}-\d{2}-\d{2}/gm))) {
        return res.status(400).json({message:'A data de nascimento não está no formato correto!'})
      }
+     const emailexistente = await Aluno.findOne({ //findone permite passar condições para ele buscar
+      where: {
+       email: email
+        }  
+          })
+      if(emailexistente) { 
+        return res.status(409).json({message: "Email já cadastrado"})  //409 é o código de conflict. 403 é não autorizado, normalmente utilizado em coisas de permissão
+      }  
+     const alunoexistente = await Aluno.findOne({ //findone permite passar condições para ele buscar
+      where: {
+        nome: nome
+        }  
+          })
+      if(alunoexistente) { 
+        return res.status(409).json({message: "Nome de Aluno já cadastrado"})  //409 é o código de conflict. 403 é não autorizado, normalmente utilizado em coisas de permissão
+      }  
      //para criptografar senha com bcrypt
     //  const salt = await bcrypt.genSalt(10);
     //  const hashedPassword = await bcrypt.hash(password, salt);
