@@ -35,6 +35,53 @@ if(!(alunoExistente && cursoExistente)) {
 }
 
 
+async listar(req,res) {
+  try {  
+    const matriculas = await Matricula.findAll()   //aqui, findAll() busca todos os alunos 
+       res.status(200).json(matriculas)
+      } catch (error) {
+        console.error(`Erro ao tentar listar: ${error}`);
+        return res.status(500).json({error: 'Erro interno do servidor'});
+      }
+}
+
+async alterar(req,res) {
+  try {
+    const id = req.params.id;  // pode ser const { id} = req.params
+    const matricula = await Matricula.findByPk(id)
+    
+    if(!matricula){
+      console.error(`Erro ao buscar matricula: ${error}`);
+      return res.status(404).json({error: 'Matrícula não encontrada.'})
+    }
+    matricula.update(req.body) //dados vêm do body. 
+    await matricula.save()
+    console.log("Alteração realizada com sucesso!")
+    res.status(200).json(matricula)
+  }
+  catch (error) {
+  console.log(error.message)
+  res.status(500).json({ error: 'Não foi possível realizar a alteração.'})
+  
+  }
+}
+
+async deletar(req,res) {
+  try {
+    const {id} = req.params; 
+  const matricula = await Matricula.findByPk(id);
+  if (!matricula) {
+  return res.status(404).json({ error: 'ID não encontrado'})
+  }     
+    
+  await matricula.destroy();
+  return res.status(204).json({message: `Matrícula ID ${id} deletada com sucesso!`})
+  } catch (error) {
+    console.error(`Erro ao tentar deletar: ${error}`);
+    return res.status(500).json({error: 'Erro interno do servidor'});
+  }   
+}
+
 }
 
 module.exports = new MatriculaController()

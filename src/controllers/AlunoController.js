@@ -95,7 +95,60 @@ async listarUm (req,res) {
 
 }
 
+async alterar(req,res) { 
+  try {
+    const id = req.params.id;
+  const aluno = await Aluno.findByPk(id)
+  
+  if(!aluno){
+    return res.status(404).json({error: 'Aluno não encontrado.'})
+  }
+  aluno.update(req.body)
+  await aluno.save()
+  console.log("Alteração realizada com sucesso!")
+  res.status(200).json(aluno)
+  } catch (error) {
+    console.error(`Erro ao tentar alterar: ${error}`);
+    return res.status(500).json({error: 'Erro interno do servidor'});
+  }
+}
 
+async alterarParcial(req,res) { 
+  try {
+    const  id = req.params.id;
+  const celular = req.body.celular;
+   const aluno = await Aluno.findByPk(id)
+  
+    if (!aluno) {
+  return  res.status(404).json({ error: 'Aluno não encontrado.'})
+    }
+  
+  aluno.celular = celular;
+  await aluno.save()
+  console.log("Alteração realizada com sucesso!")
+  res.status(200).json({ message: `Aluno id ${id} teve o celular alterado para ${celular} com sucesso!`});
+  } catch (error) {
+    console.error(`Erro ao tentar atualizar: ${error}`);
+    return res.status(500).json({error: 'Erro interno do servidor'});
+  }  
+}
+
+async deletar(req,res) { 
+  try{
+    const { id } = req.params;   //ou const id = req.params.id
+   const aluno = await Aluno.findByPk(id);
+   if(!aluno) {
+    return res.status(404).json({error:`Aluno ID ${id} não encontrado.`})
+     }
+   await aluno.destroy() //ele deleta usando sequelize.
+    
+    res.status(204).json({message: `Aluno ID ${id} deletado com sucesso!`})
+  } catch (error) {
+    console.error(`Erro ao tentar excluir: ${error}`);
+    return res.status(500).json({error: 'Erro interno do servidor'});
+  }
+  
+}
 
 }
 

@@ -1,18 +1,18 @@
 const { Router } = require("express");
-const alunosRoutes = require("./alunos.routes");
-const cursosRoutes = require("./cursos.routes");
+const alunoRoutes = require("./aluno.routes");
+const cursoRoutes = require("./curso.routes");
 const loginRoutes = require("./login.routes");
 const matriculaRoutes = require("./matricula.routes");
-const professoresRoutes = require("./professores.routes");
+const professorRoutes = require("./professor.routes");
 
 const routes = Router()
 
-//Se prevê assim, não precisa acrescentar /alunos lá em alunos
-routes.use('/alunos', alunosRoutes) 
-routes.use('/cursos', cursosRoutes)
+//Se previr assim, não precisa acrescentar /alunos lá em alunos
+routes.use('/alunos', alunoRoutes) 
+routes.use('/cursos', cursoRoutes)
 routes.use('/login', loginRoutes)
 routes.use('/matriculas', matriculaRoutes) 
-routes.use('/professores', professoresRoutes)
+routes.use('/professores', professorRoutes)
 
 
 

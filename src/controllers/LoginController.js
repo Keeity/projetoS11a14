@@ -38,8 +38,8 @@ async login(req,res) {
     }
 
 }
-
-async alterarSenha (req,res) {
+//alterar senha - utilizando id constante no payload
+async alterarSenha (req,res) { 
     try {
         const id = req.payload.sub //usando o que há no payload.
        const password = req.body.password //pega a nova senha do corpo da requisição
