@@ -9,7 +9,7 @@ const LoginController = require('../controllers/LoginController')
 loginRoutes.post('/', LoginController.login)
 
 // //alterar senha 
-loginRoutes.put('/alterarsenha', auth, LoginController.alterarSenha)
+loginRoutes.put('/alterarsenha', LoginController.alterarSenha)
 
 module.exports = loginRoutes  //exporta 
 // é o mesmo que: export default routes

@@ -3,6 +3,7 @@ const { Op } = require("sequelize"); //Op é importado do sequelize .  Op é usa
 const { secret } = require('../config/database.config');
 const Aluno = require('../models/Aluno');
 const {Router} = require('express');
+const { compare, hash } = require("bcryptjs") //para comparar senha criptografada com a passada pelo usuário
 
 class LoginController {
 
@@ -20,13 +21,19 @@ async login(req,res) {
         }
   
         const aluno = await Aluno.findOne({
-            where: {email:email, password:password}
+            where: {email:email}
         })
   
         if(!aluno){
             return res.status(404).json({ messagem: 'Nenhum aluno corresponde a email e senha fornecidos!' })
         }
   
+        
+        const hashSenha = await compare(password, aluno.password)
+
+        if(hashSenha === false) {
+            return res.status(403).json({mensagem: 'Email e/ou senha não conferem'})
+        }
         const payload = {sub: aluno.id, email: aluno.email, nome: aluno.nome} //sub é usado para representar o sujeito (é normalmente ID). Essas informações estarão no corpo do token
         const token = sign(payload, secret, {expiresIn: "24h"}) // usa função sign do JWT. cria token padrão token jwt (Usando algoritmo HS256 - a mesma chave é usada para assinar e verificar o token) . puxa password do .env. --> importou lá em cima do database.config
                      // ao invés de secret poderia utilizar process.env.SECRET_JWT
@@ -48,8 +55,15 @@ async alterarSenha (req,res) {
      if(!aluno){
        return res.status(404).json({error: 'Aluno não encontrado.'})
      }
-     aluno.password = password;
-     await aluno.save();
+     
+     const hashSenha = await compare(password, aluno.password)
+
+     if(hashSenha) {
+        return res.status(403).json({mensagem: 'A senha é idêntica à já cadastrada'})
+    }
+aluno.password = await hash(password, 8) // criptografa o password antes de salvar. se não usar o beforeSave como há abaixo, que vale para todas as rotas, pode escrever a linha como essa.
+    
+await aluno.save();
      console.log("Alteração de senha realizada com sucesso!")
      res.status(200).json({message: "Alteração de senha realizada com sucesso!"})
      } catch (error) {
@@ -59,4 +73,10 @@ async alterarSenha (req,res) {
 }
 
 }
+
+Aluno.beforeSave(async (aluno) => {  //antes de fazer o .save no banco de dados.
+  if (aluno.changed('password')) {  aluno.password = await hash(aluno.password, 8) 
+  }
+})
+
 module.exports = new LoginController()
