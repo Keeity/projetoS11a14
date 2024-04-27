@@ -2,8 +2,8 @@ const { sign }  = require ('jsonwebtoken')
 const { Op } = require("sequelize"); //Op é importado do sequelize .  Op é usado na definição da rota para especificar o operador de consulta do Sequelize.
 const { secret } = require('../config/database.config');
 const Aluno = require('../models/Aluno');
-const {Router} = require('express');
 const { compare, hash } = require("bcryptjs") //para comparar senha criptografada com a passada pelo usuário
+const {Router} = require('express');
 
 class LoginController {
 
@@ -55,14 +55,15 @@ async alterarSenha (req,res) {
      if(!aluno){
        return res.status(404).json({error: 'Aluno não encontrado.'})
      }
-     
-     const hashSenha = await compare(password, aluno.password)
 
-     if(hashSenha) {
-        return res.status(403).json({mensagem: 'A senha é idêntica à já cadastrada'})
-    }
-aluno.password = await hash(password, 8) // criptografa o password antes de salvar. se não usar o beforeSave como há abaixo, que vale para todas as rotas, pode escrever a linha como essa.
-    
+   //  const hashSenha = await compare(password, aluno.password)
+
+     //if(hashSenha) {
+      //  return res.status(403).json({mensagem: 'A senha é idêntica à já cadastrada'})
+    //}
+
+//aluno.password = await hash(password, 8) // criptografa o password antes de salvar. se não usar o beforeSave como há abaixo, que vale para todas as rotas, pode escrever a linha como essa.
+aluno.password = password
 await aluno.save();
      console.log("Alteração de senha realizada com sucesso!")
      res.status(200).json({message: "Alteração de senha realizada com sucesso!"})
@@ -73,10 +74,5 @@ await aluno.save();
 }
 
 }
-
-Aluno.beforeSave(async (aluno) => {  //antes de fazer o .save no banco de dados.
-  if (aluno.changed('password')) {  aluno.password = await hash(aluno.password, 8) 
-  }
-})
 
 module.exports = new LoginController()
