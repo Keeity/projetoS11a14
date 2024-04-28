@@ -7,7 +7,7 @@ const Aluno = require('./Aluno')
 const Curso = require('./Curso')
 
 
-//Define a variável Aluno que representa a conexão com o banco de dados, com a tabela alunos
+//Define a variável Matricula que representa a conexão com o banco de dados, com a tabela alunos
 const Matricula = connection.define('matriculas', { //aqui, diz que quer conectar ao banco de dados, à tabela 'alunos'.
 aluno_id: { //define cada coluna da tabela que se quer manipular - visualizar ou acessar. ID não precisa
     type: DataTypes.INTEGER, //EU TINHA COLOCADO NUMBER
@@ -22,8 +22,12 @@ curso_id: {
         model: Curso,
         key: 'id'
     }
-} 
-})
+}
+}
+
+,{paranoid: true}
+
+);
 
 //chave estrangeira
 Aluno.hasMany( Matricula, {foreignKey: 'aluno_id'}) //modelo de um para muitos. aluno tem muitas matriculas

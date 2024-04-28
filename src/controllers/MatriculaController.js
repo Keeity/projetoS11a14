@@ -55,26 +55,6 @@ async listar(req,res) {
       }
 }
 
-async alterar(req,res) {
-  try {
-    const id = req.params.id;  // pode ser const { id} = req.params
-    const matricula = await Matricula.findByPk(id)
-    
-    if(!matricula){
-      console.error(`Erro ao buscar matricula: ${error}`);
-      return res.status(404).json({error: 'Matrícula não encontrada.'})
-    }
-    matricula.update(req.body) //dados vêm do body. 
-    await matricula.save()
-    console.log("Alteração realizada com sucesso!")
-    res.status(200).json(matricula)
-  }
-  catch (error) {
-  console.log(error.message)
-  res.status(500).json({ error: 'Não foi possível realizar a alteração.'})
-  
-  }
-}
 
 async deletar(req,res) {
   try {

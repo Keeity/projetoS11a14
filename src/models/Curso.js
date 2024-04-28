@@ -1,4 +1,5 @@
 // Esse arquivo serve para conectar à tabela que quer mexer.
+const Professor = require('./Professor')
 
 const { DataTypes } = require('sequelize') //IMPORTA SEQUELIZE
 // variável connection é que faz conexão com banco de dados
@@ -10,13 +11,24 @@ nome: { //define cada coluna da tabela que se quer manipular - visualizar ou ace
     type: DataTypes.STRING //esse DataTypes importa do sequelize. Ao invés do varchar, coloca STRING
 },
 duracao_horas: {
-    type: DataTypes.NUMBER
+    type: DataTypes.INTEGER
 } ,
 professor_id: {
-    type: DataTypes.NUMBER
+    type: DataTypes.INTEGER,
+    references: {   //faz referência.
+        model: Professor,
+        key: 'id'
+    }
 } 
-})
+}
+,{paranoid: true}// é o soft delete do sequelize. faz registro no bdd
 
+)
+
+
+//chave estrangeira
+Professor.hasMany(Curso, {foreignKey: 'professor_id'}) //modelo de um para muitos. professor dá aulas em muitos cursos
+Curso.belongsTo(Professor, {foreignKey: 'professor_id'}) // Cada curso tem apenas 1 professor
 //para usar em qualquer lugar, exporta
 
 module.exports = Curso //Model coloca com A maiúsculo.
