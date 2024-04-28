@@ -20,7 +20,7 @@ module.exports = {
      },
 
     professor_id: {
-      allowNull: true,
+      allowNull: false,
    type: Sequelize.INTEGER,
    references: {
      model: 'professores',
@@ -37,7 +37,11 @@ module.exports = {
       updatedAt: {
        allowNull: false,
        type: Sequelize.DATE
-     }
+     },
+     deletedAt: {
+        type: Sequelize.DATE,
+        allowNull: true
+      }
      });
   },
 

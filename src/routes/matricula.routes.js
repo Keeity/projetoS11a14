@@ -11,9 +11,6 @@ matriculaRoutes.post('/', auth, MatriculaController.cadastrar)
 //lista matriculas
 matriculaRoutes.get('/', auth, MatriculaController.listar)
 
-//altera por id
-matriculaRoutes.put('/:id', auth, MatriculaController.alterar)  
-
 // deleta por ID  valida se existe
 matriculaRoutes.delete('/:id', auth, MatriculaController.deletar)  
 

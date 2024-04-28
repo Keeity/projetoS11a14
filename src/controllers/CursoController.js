@@ -1,4 +1,5 @@
 const Curso = require("../models/Curso");
+const Professor = require("../models/Professor");
 //const {Router} = require('express');
 
 class CursoController {

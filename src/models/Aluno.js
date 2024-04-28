@@ -22,7 +22,9 @@ data_nascimento: {
 celular: {
     type: DataTypes.STRING //o número de telefone é uma string e pode incluir caracteres significativos, como colchetes () , hífens - ou caracteres
 }
-})
+}
+,{paranoid: true}// é o soft delete do sequelize. faz registro no bdd
+)
 
 //para usar em qualquer lugar, exporta
 

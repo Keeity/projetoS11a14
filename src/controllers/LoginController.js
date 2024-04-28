@@ -51,8 +51,8 @@ async alterarSenha (req,res) {
         const id = req.payload.sub //usando o que há no payload.
        const password = req.body.password //pega a nova senha do corpo da requisição
        const aluno = await Aluno.findByPk(id)
-     
-     if(!aluno){
+      
+    if(!aluno){
        return res.status(404).json({error: 'Aluno não encontrado.'})
      }
 

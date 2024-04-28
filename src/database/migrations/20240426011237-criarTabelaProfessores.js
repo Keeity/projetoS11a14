@@ -14,11 +14,7 @@ module.exports = {
       allowNull: false,
       type: Sequelize.STRING
      },
-     area_atuacao: {
-      allowNull: true,
-      type: Sequelize.STRING
-     },
-     celular: {
+      celular: {
       allowNull: false,
       type: Sequelize.STRING
      },
@@ -29,7 +25,11 @@ module.exports = {
      updatedAt: {
       allowNull: false,
       type: Sequelize.DATE
-    }
+    },
+     deletedAt: {
+        type: Sequelize.DATE,
+        allowNull: true
+      }
     });
     
   },
